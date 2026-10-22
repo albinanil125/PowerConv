@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PowerConv - Universal Conversion & Media Studio Suite</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%239333ea'/><text x='50%' y='55%' dominant-baseline='middle' text-anchor='middle' font-size='60' fill='%23ffffff'>⚡</text></svg>">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body {
+            min-height: 100vh;
+            background-color: #0d001a;
+            background-image: linear-gradient(135deg, rgba(13,0,26,0.85) 0%, rgba(26,0,51,0.85) 50%, rgba(13,0,26,0.85) 100%), url('/static/bg.jpg');
+            background-size: cover; background-position: center; background-attachment: fixed;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            color: #ffffff; padding: 20px;
+        }
+        .glass-card {
+            background: rgba(22, 0, 44, 0.90);
+            backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 28px; padding: 40px;
+            max-width: 960px; width: 100%;
+            box-shadow: 0 35px 70px rgba(0, 0, 0, 0.85);
+            text-align: center;
+        }
+        .brand-logo { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 12px; }
+        .logo-icon {
+            width: 48px; height: 48px; background: linear-gradient(135deg, #9333ea, #ec4899);
+            border-radius: 14px; display: flex; align-items: center; justify-content: center;
+            font-size: 24px; font-weight: 800; color: #fff; box-shadow: 0 8px 25px rgba(147, 51, 234, 0.5);
+        }
+        .brand-logo h1 { font-size: 32px; font-weight: 800; color: #fff; }
+        .brand-logo span { background: linear-gradient(135deg, #a855f7, #ec4899); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .intro-text { color: #c084fc; font-size: 15px; line-height: 1.6; margin-bottom: 30px; }
+        
+        .studio-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 25px; }
+        .studio-card {
+            background: rgba(13, 0, 26, 0.65); border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 22px; border-radius: 18px; cursor: pointer; text-align: left; transition: all 0.3s ease;
+        }
+        .studio-card:hover {
+            background: linear-gradient(135deg, rgba(147, 51, 234, 0.25), rgba(236, 72, 153, 0.25));
+            border-color: #a855f7; box-shadow: 0 10px 30px rgba(147, 51, 234, 0.35); transform: translateY(-3px);
+        }
+        .studio-card h3 { font-size: 17px; font-weight: 700; color: #fff; margin-bottom: 6px; display: flex; align-items: center; gap: 10px; }
+        .studio-card p { font-size: 13px; color: #a78bfa; line-height: 1.4; }
+
+        .action-panel {
+            background: rgba(13, 0, 26, 0.6); border: 1px solid rgba(168, 85, 247, 0.35);
+            border-radius: 20px; padding: 30px; display: none; text-align: left;
+        }
+        .action-panel.active { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+        label { display: block; color: #a78bfa; font-size: 13px; font-weight: 600; margin-bottom: 10px; }
+        .category-title { font-size: 14px; color: #fff; margin: 20px 0 10px 0; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px; }
+
+        .conv-boxes-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 15px; }
+        .conv-box {
+            background: rgba(22, 0, 44, 0.8); border: 2px solid rgba(255, 255, 255, 0.1);
+            padding: 12px; border-radius: 12px; cursor: pointer; text-align: center; transition: all 0.2s ease;
+        }
+        .conv-box:hover { border-color: #a855f7; background: rgba(147, 51, 234, 0.15); }
+        .conv-box input[type="radio"] { display: none; }
+        .conv-box.selected {
+            background: linear-gradient(135deg, rgba(147, 51, 234, 0.4), rgba(236, 72, 153, 0.4));
+            border-color: #c084fc; box-shadow: 0 5px 15px rgba(147, 51, 234, 0.4);
+        }
+        .conv-box .pair { font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 3px; }
+        .conv-box .desc { font-size: 11px; color: #c084fc; }
+
+        select, input[type="file"], input[type="text"], input[type="number"] {
+            width: 100%; padding: 14px; background: rgba(22, 0, 44, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 12px;
+            color: #ffffff; font-size: 14px; outline: none; margin-bottom: 18px;
+        }
+        select option { background: #160b26; color: #fff; padding: 10px; }
+        
+        .upload-box {
+            border: 2px dashed rgba(168, 85, 247, 0.45); background: rgba(13, 0, 26, 0.75);
+            padding: 30px; border-radius: 14px; cursor: pointer; text-align: center; margin-bottom: 20px; position: relative;
+            transition: border-color 0.2s ease;
+        }
+        .upload-box:hover { border-color: #c084fc; }
+        .upload-box input[type="file"] { position: absolute; width: 100%; height: 100%; top: 0; left: 0; opacity: 0; cursor: pointer; margin: 0; }
+        
+        .btn-primary {
+            width: 100%; background: linear-gradient(135deg, #9333ea, #c084fc);
+            color: white; border: none; padding: 15px; border-radius: 14px;
+            font-size: 16px; font-weight: 700; cursor: pointer; box-shadow: 0 10px 25px rgba(147, 51, 234, 0.4);
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover { transform: translateY(-2px); background: linear-gradient(135deg, #a855f7, #e879f9); }
+        .back-btn { background: transparent; border: none; color: #a78bfa; font-size: 14px; cursor: pointer; margin-bottom: 18px; display: inline-flex; align-items: center; gap: 6px; font-weight: 600; }
+        .back-btn:hover { color: #fff; }
+    </style>
+</head>
+<body>
+    <div class="glass-card">
+        <div class="brand-logo">
+            <div class="logo-icon">⚡</div>
+            <h1>Power<span>Conv</span></h1>
+        </div>
+        <p class="intro-text">
+            Professional Universal Conversion & Media Studio Suite. Select a dedicated studio below to process your files.
+        </p>
+
+        <!-- Studio Selector Grid -->
+        <div id="studioSelector" class="studio-grid">
+            <div class="studio-card" onclick="selectStudio('converter')">
+                <h3>🔄 File Converter</h3>
+                <p>Convert seamlessly between images, video formats, spreadsheets, and documents.</p>
+            </div>
+            <div class="studio-card" onclick="selectStudio('pdf')">
+                <h3>📄 PDF Studio</h3>
+                <p>Merge multiple files, visually rearrange pages, rotate, or compress PDFs.</p>
+            </div>
+            <div class="studio-card" onclick="selectStudio('image')">
+                <h3>🖼️ Image Studio</h3>
+                <p>Launch the interactive Image Editor or compress file sizes directly.</p>
+            </div>
+            <div class="studio-card" onclick="selectStudio('video')">
+                <h3>🎬 Video Studio</h3>
+                <p>Launch the interactive Video Editor or compress file sizes and bitrates directly.</p>
+            </div>
+        </div>
+
+        <!-- 1. File Converter Panel -->
+        <form id="panel-converter" class="action-panel" action="/upload" method="POST" enctype="multipart/form-data" onsubmit="showLoader()">
+            <button type="button" class="back-btn" onclick="resetStudio()">← Back to Studios</button>
+            <input type="hidden" name="tool_type" value="converter">
+            <h2 style="font-size: 22px; margin-bottom: 5px; color:#fff;">🔄 File Converter Studio</h2>
+            
+            <h4 class="category-title">🖼️ Image Conversions</h4>
+            <div class="conv-boxes-grid">
+                <div class="conv-box selected" data-group="converter" onclick="selectConvBox(this, 'converter')">
+                    <input type="radio" name="conv_sub_type" value="img_to_png" checked>
+                    <div class="pair">Image ➔ PNG</div>
+                    <div class="desc">High quality lossless</div>
+                </div>
+                <div class="conv-box" data-group="converter" onclick="selectConvBox(this, 'converter')">
+                    <input type="radio" name="conv_sub_type" value="img_to_jpg">
+                    <div class="pair">Image ➔ JPG</div>
+                    <div class="desc">Standard compressed</div>
+                </div>
+                <div class="conv-box" data-group="converter" onclick="selectConvBox(this, 'converter')">
+                    <input type="radio" name="conv_sub_type" value="img_to_webp">
+                    <div class="pair">Image ➔ WEBP</div>
+                    <div class="desc">Modern web format</div>
+                </div>
+            </div>
+
+            <h4 class="category-title">🎬 Video Conversions</h4>
+            <div class="conv-boxes-grid">
+                <div class="conv-box" data-group="converter" onclick="selectConvBox(this, 'converter')">
+                    <input type="radio" name="conv_sub_type" value="video_to_mp4">
+                    <div class="pair">Video ➔ MP4</div>
+                    <div class="desc">Universal format</div>
+                </div>
+                <div class="conv-box" data-group="converter" onclick="selectConvBox(this, 'converter')">
+                    <input type="radio" name="conv_sub_type" value="video_to_webm">
+                    <div class="pair">Video ➔ WebM</div>
+                    <div class="desc">Optimized for Web</div>
+                </div>
+                <div class="conv-box" data-group="converter" onclick="selectConvBox(this, 'converter')">
+                    <input type="radio" name="conv_sub_type" value="video_to_gif">
+                    <div class="pair">Video ➔ GIF</div>
+                    <div class="desc">Animated loop</div>
+                </div>
+            </div>
+
+            <h4 class="category-title">📄 Documents & Data</h4>
+            <div class="conv-boxes-grid">
+                <div class="conv-box" data-group="converter" onclick="selectConvBox(this, 'converter')">
+                    <input type="radio" name="conv_sub_type" value="img_to_pdf">
+                    <div class="pair">Image ➔ PDF</div>
+                    <div class="desc">Document container</div>
+                </div>
+                <div class="conv-box" data-group="converter" onclick="selectConvBox(this, 'converter')">
+                    <input type="radio" name="conv_sub_type" value="pdf_to_txt">
+                    <div class="pair">PDF ➔ Text</div>
+                    <div class="desc">Extract raw text</div>
+                </div>
+                <div class="conv-box" data-group="converter" onclick="selectConvBox(this, 'converter')">
+                    <input type="radio" name="conv_sub_type" value="sheet_to_csv">
+                    <div class="pair">Sheet ➔ CSV</div>
+                    <div class="desc">Comma separated</div>
+                </div>
+            </div>
+
+            <div class="upload-box" style="margin-top: 25px;">
+                <div style="font-size: 32px; margin-bottom: 8px;">📁</div>
+                <h4 style="font-size: 15px; color: #fff; margin-bottom: 4px;">Choose File to Convert</h4>
+                <p style="font-size: 13px; color: #a78bfa;" id="fileLabel-converter">Drop your file here or click to browse</p>
+                <input type="file" name="file" required onchange="updateFileName(this, 'fileLabel-converter')">
+            </div>
+            <button type="submit" class="btn-primary">Run Conversion</button>
+        </form>
+
+        <!-- 2. PDF Studio Panel -->
+        <form id="panel-pdf" class="action-panel" action="/upload" method="POST" enctype="multipart/form-data" onsubmit="showLoader()">
+            <button type="button" class="back-btn" onclick="resetStudio()">← Back to Studios</button>
+            <input type="hidden" name="tool_type" value="pdf">
+            <h2 style="font-size: 22px; margin-bottom: 15px; color:#fff;">📄 PDF Studio</h2>
+            
+            <label>1. Select PDF Action:</label>
+            <div class="conv-boxes-grid" style="grid-template-columns: 1fr;">
+                <div class="conv-box selected" data-group="pdf_action" onclick="selectConvBox(this, 'pdf_action'); togglePdfMode('edit')">
+                    <input type="radio" name="pdf_action" value="edit" checked>
+                    <div class="pair">Visual Page Rearrange & Rotate</div>
+                </div>
+                <div class="conv-box" data-group="pdf_action" onclick="selectConvBox(this, 'pdf_action'); togglePdfMode('merge')">
+                    <input type="radio" name="pdf_action" value="merge">
+                    <div class="pair">Merge Multiple PDF Files</div>
+                </div>
+                <div class="conv-box" data-group="pdf_action" onclick="selectConvBox(this, 'pdf_action'); togglePdfMode('compress')">
+                    <input type="radio" name="pdf_action" value="compress">
+                    <div class="pair">Compress PDF File Size</div>
+                </div>
+            </div>
+
+            <div class="upload-box" id="pdfUploadBox" style="margin-top: 20px;">
+                <div style="font-size: 32px; margin-bottom: 8px;">📄</div>
+                <h4 style="font-size: 15px; color: #fff; margin-bottom: 4px;" id="pdfBoxTitle">2. Upload PDF Document</h4>
+                <p style="font-size: 13px; color: #a78bfa;" id="fileLabel-pdf">Select your primary PDF file</p>
+                <input type="file" name="file" id="pdfFileInput" required onchange="updateFileName(this, 'fileLabel-pdf')">
+            </div>
+            <button type="submit" class="btn-primary" id="pdfSubmitBtn">Launch PDF Studio</button>
+        </form>
+
+        <!-- 3. Image Studio Panel -->
+        <form id="panel-image" class="action-panel" action="/upload" method="POST" enctype="multipart/form-data" onsubmit="showLoader()">
+            <button type="button" class="back-btn" onclick="resetStudio()">← Back to Studios</button>
+            <input type="hidden" name="tool_type" value="image">
+            <h2 style="font-size: 22px; margin-bottom: 15px; color:#fff;">🖼️ Image Studio</h2>
+            
+            <label>1. Select Image Action:</label>
+            <div class="conv-boxes-grid" style="grid-template-columns: 1fr 1fr;">
+                <div class="conv-box selected" data-group="image_action" onclick="selectConvBox(this, 'image_action')">
+                    <input type="radio" name="image_action" value="edit" checked>
+                    <div class="pair">Image Editor</div>
+                    <div class="desc">Resize, Crop, Color Adjust</div>
+                </div>
+                <div class="conv-box" data-group="image_action" onclick="selectConvBox(this, 'image_action')">
+                    <input type="radio" name="image_action" value="compress">
+                    <div class="pair">Image Compressor</div>
+                    <div class="desc">Reduce File Size</div>
+                </div>
+            </div>
+
+            <div class="upload-box" style="margin-top: 20px;">
+                <div style="font-size: 32px; margin-bottom: 8px;">🖼️</div>
+                <h4 style="font-size: 15px; color: #fff; margin-bottom: 4px;">2. Upload Image</h4>
+                <p style="font-size: 13px; color: #a78bfa;" id="fileLabel-image">Supports PNG, JPG, WEBP, BMP</p>
+                <input type="file" name="file" required onchange="updateFileName(this, 'fileLabel-image')">
+            </div>
+            <button type="submit" class="btn-primary">Launch Image Studio</button>
+        </form>
+
+        <!-- 4. Video Studio Panel -->
+        <form id="panel-video" class="action-panel" action="/upload" method="POST" enctype="multipart/form-data" onsubmit="showLoader()">
+            <button type="button" class="back-btn" onclick="resetStudio()">← Back to Studios</button>
+            <input type="hidden" name="tool_type" value="video">
+            <h2 style="font-size: 22px; margin-bottom: 15px; color:#fff;">🎬 Video Studio</h2>
+
+            <label>1. Select Video Action:</label>
+            <div class="conv-boxes-grid" style="grid-template-columns: 1fr 1fr;">
+                <div class="conv-box selected" data-group="video_action" onclick="selectConvBox(this, 'video_action')">
+                    <input type="radio" name="video_action" value="edit" checked>
+                    <div class="pair">Video Editor</div>
+                    <div class="desc">Resize Dimensions, Mute</div>
+                </div>
+                <div class="conv-box" data-group="video_action" onclick="selectConvBox(this, 'video_action')">
+                    <input type="radio" name="video_action" value="compress">
+                    <div class="pair">Video Compressor</div>
+                    <div class="desc">Reduce Bitrate & Size</div>
+                </div>
+            </div>
+
+            <div class="upload-box" style="margin-top: 20px;">
+                <div style="font-size: 32px; margin-bottom: 8px;">🎥</div>
+                <h4 style="font-size: 15px; color: #fff; margin-bottom: 4px;">2. Upload Video File</h4>
+                <p style="font-size: 13px; color: #a78bfa;" id="fileLabel-video">Supports MP4, AVI, MOV, WebM</p>
+                <input type="file" name="file" required onchange="updateFileName(this, 'fileLabel-video')">
+            </div>
+            <button type="submit" class="btn-primary">Launch Video Studio</button>
+        </form>
+    </div>
+
+    <!-- Processing Overlay Loader -->
+    <div id="processingOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(13,0,26,0.92); backdrop-filter:blur(12px); z-index:9999; flex-direction:column; align-items:center; justify-content:center;">
+        <div style="width:65px; height:65px; border:4px solid rgba(168,85,247,0.2); border-top:4px solid #a855f7; border-radius:50%; animation:spin 1s linear infinite; margin-bottom:20px;"></div>
+        <h2 style="color:#fff; font-size:24px; font-weight:700; margin-bottom:8px;">PowerConv Engine Processing...</h2>
+        <p style="color:#a78bfa; font-size:15px;">Optimizing and compiling your file securely.</p>
+    </div>
+    <style>
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+
+    <script>
+        function selectStudio(name) {
+            document.getElementById('studioSelector').style.display = 'none';
+            document.querySelectorAll('.action-panel').forEach(p => p.classList.remove('active'));
+            document.getElementById('panel-' + name).classList.add('active');
+        }
+        function resetStudio() {
+            document.querySelectorAll('.action-panel').forEach(p => p.classList.remove('active'));
+            document.getElementById('studioSelector').style.display = 'grid';
+        }
+        function selectConvBox(boxElement, groupName) {
+            document.querySelectorAll(`.conv-box[data-group="${groupName}"]`).forEach(b => b.classList.remove('selected'));
+            boxElement.classList.add('selected');
+            boxElement.querySelector('input[type="radio"]').checked = true;
+        }
+        function updateFileName(input, labelId) {
+            if (input.files && input.files[0]) {
+                document.getElementById(labelId).innerText = "Selected: " + input.files[0].name;
+            }
+        }
+        function togglePdfMode(val) {
+            const inputField = document.getElementById('pdfFileInput');
+            if (val === 'merge') {
+                inputField.multiple = true;
+                document.getElementById('pdfBoxTitle').innerText = "2. Upload Multiple PDFs to Merge";
+            } else {
+                inputField.multiple = false;
+                document.getElementById('pdfBoxTitle').innerText = "2. Upload PDF Document";
+            }
+        }
+        function showLoader() {
+            document.getElementById('processingOverlay').style.display = 'flex';
+        }
+    </script>
+</body>
+</html>
