@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PowerConv - Ultimate File Studio & Document Engine</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body {
+            min-height: 100vh;
+            background: #0d001a url('/static/bg.jpg') center/cover no-repeat fixed;
+            background-blend-mode: overlay;
+            display: flex; align-items: center; justify-content: center;
+            color: #ffffff; padding: 20px; overflow-x: hidden;
+        }
+        .main-container {
+            width: 100%; max-width: 640px;
+            background: rgba(22, 0, 44, 0.82);
+            backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 24px; padding: 45px 35px;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.7); text-align: center;
+        }
+        .brand-header {
+            display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 8px;
+        }
+        .brand-header h1 { font-size: 32px; font-weight: 800; }
+        .brand-header span.highlight {
+            background: linear-gradient(135deg, #a855f7, #ec4899);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .tagline { color: #a78bfa; font-size: 14px; margin-bottom: 25px; font-weight: 400; }
+        .tool-navigation {
+            display: flex; gap: 8px; margin-bottom: 25px; justify-content: center; flex-wrap: wrap;
+        }
+        .nav-btn {
+            background: rgba(13, 0, 26, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #a78bfa; padding: 10px 16px; border-radius: 10px;
+            cursor: pointer; font-size: 13px; font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .nav-btn.active, .nav-btn:hover {
+            background: linear-gradient(135deg, #a855f7, #ec4899);
+            color: white; border-color: transparent;
+            box-shadow: 0 4px 15px rgba(168, 85, 247, 0.4);
+        }
+        .drop-zone {
+            border: 2px dashed rgba(168, 85, 247, 0.4);
+            border-radius: 16px; padding: 35px 20px;
+            background: rgba(13, 0, 26, 0.4);
+            cursor: pointer; transition: all 0.3s ease; margin-bottom: 25px;
+        }
+        .drop-zone:hover {
+            border-color: #a855f7; background: rgba(168, 85, 247, 0.1);
+        }
+        .btn-submit {
+            width: 100%; background: linear-gradient(135deg, #9333ea, #c084fc);
+            color: white; border: none; padding: 16px; border-radius: 12px;
+            font-size: 16px; font-weight: 700; cursor: pointer;
+            box-shadow: 0 10px 25px rgba(147, 51, 234, 0.4); transition: all 0.3s ease;
+        }
+        .btn-submit:hover {
+            transform: translateY(-2px); background: linear-gradient(135deg, #a855f7, #e879f9);
+        }
+        /* Global Loading Overlay Style */
+        #homeLoadingOverlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(13,0,26,0.9); backdrop-filter: blur(10px); z-index: 9999;
+            flex-direction: column; align-items: center; justify-content: center;
+        }
+        .spinner {
+            width: 60px; height: 60px; border: 4px solid rgba(168,85,247,0.2);
+            border-top: 4px solid #a855f7; border-radius: 50%;
+            animation: spin 1s linear infinite; margin-bottom: 20px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+        <div class="brand-header">
+            <img src="{{ url_for('static', filename='logo.svg') }}" alt="PowerConv Logo" style="width: 42px; height: 42px; object-fit: contain;" onerror="this.style.display='none'">
+            <h1>Power<span class="highlight">Conv</span></h1>
+        </div>
+        <p class="tagline">Universal File Studio & Advanced Document Engine</p>
+
+        <!-- Navigation Tabs -->
+        <div class="tool-navigation">
+            <button type="button" class="nav-btn active" data-tool="convert">⚡ File Converter</button>
+            <button type="button" class="nav-btn" data-tool="pdf_edit">📄 PDF Studio</button>
+            <button type="button" class="nav-btn" data-tool="image_enhance">🖼️ Image Studio</button>
+        </div>
+
+        <form action="/upload" method="POST" enctype="multipart/form-data" onsubmit="showHomeLoader()">
+            <input type="hidden" name="tool_type" id="toolTypeInput" value="convert">
+
+            <div class="drop-zone" id="dropZone">
+                <span style="font-size: 38px; display: block; margin-bottom: 10px;">⚡</span>
+                <p id="promptText" style="color: #f3e8ff; font-size: 15px; margin-bottom: 8px;">Click or Drag & Drop a file to convert</p>
+                <p style="color: #a78bfa; font-size: 12px;">Supports Images, Spreadsheets, Documents, & PDFs</p>
+                <input type="file" id="fileInput" name="file" required style="display: none;">
+                <div id="fileDisplay" style="color: #34d399; margin-top: 12px; font-weight: 600; font-size: 14px;"></div>
+            </div>
+
+            <button type="submit" class="btn-submit">Upload & Open Tool Studio</button>
+        </form>
+    </div>
+
+    <!-- Global Loading Overlay -->
+    <div id="homeLoadingOverlay">
+        <div class="spinner"></div>
+        <h2 style="color:#fff; font-size:22px; font-weight:700; margin-bottom:8px;">Uploading to PowerConv...</h2>
+        <p style="color:#a78bfa; font-size:14px;">Preparing your interactive tool studio workspace.</p>
+    </div>
+
+    <script>
+        const tabs = document.querySelectorAll('.nav-btn');
+        const toolInput = document.getElementById('toolTypeInput');
+        const promptText = document.getElementById('promptText');
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const fileDisplay = document.getElementById('fileDisplay');
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                tabs.forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+
+                const chosenTool = this.getAttribute('data-tool');
+                toolInput.value = chosenTool;
+
+                if (chosenTool === 'convert') {
+                    promptText.innerText = "Click or Drag & Drop a file to convert";
+                } else if (chosenTool === 'pdf_edit') {
+                    promptText.innerText = "Click or Drag & Drop a PDF file to edit / rearrange";
+                } else if (chosenTool === 'image_enhance') {
+                    promptText.innerText = "Click or Drag & Drop an Image to resize / enhance";
+                }
+            });
+        });
+
+        // Drag and drop event listeners
+        dropZone.addEventListener('click', () => fileInput.click());
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.style.borderColor = '#a855f7';
+            dropZone.style.background = 'rgba(168, 85, 247, 0.1)';
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.style.borderColor = 'rgba(168, 85, 247, 0.4)';
+            dropZone.style.background = 'rgba(13, 0, 26, 0.4)';
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.style.borderColor = 'rgba(168, 85, 247, 0.4)';
+            dropZone.style.background = 'rgba(13, 0, 26, 0.4)';
+            
+            if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                fileInput.files = e.dataTransfer.files;
+                fileDisplay.innerText = "Selected: " + e.dataTransfer.files[0].name;
+            }
+        });
+
+        fileInput.addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+                fileDisplay.innerText = "Selected: " + this.files[0].name;
+            }
+        });
+
+        function showHomeLoader() {
+            if (fileInput.files.length > 0) {
+                document.getElementById('homeLoadingOverlay').style.display = 'flex';
+            }
+        }
+    </script>
+</body>
+</html>
